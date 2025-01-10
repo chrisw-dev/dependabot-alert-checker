@@ -36,7 +36,7 @@ def check_alerts():
     ALERT_THRESHOLDS = get_thresholds_from_env()
     
     # Get all open dependabot alerts
-    alerts = repo.get_vulnerability_alert()
+    alerts = repo.get_dependabot_alerts()
     
     violations = []
     all_alerts = []
