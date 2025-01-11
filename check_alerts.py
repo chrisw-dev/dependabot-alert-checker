@@ -30,10 +30,14 @@ def check_alerts():
     
     # Get repository from environment
     repo_name = os.getenv('GITHUB_REPOSITORY')
+    print(f"Checking alerts for repository: {repo_name}")
     repo = g.get_repo(repo_name)
+    print(f"Repository: {repo.full_name}")
     
     # Get thresholds from environment variables
     ALERT_THRESHOLDS = get_thresholds_from_env()
+    # Get all open dependabot alerts
+    alerts = repo.get_vulnerability_alerts()
     
     # Get all open dependabot alerts
     alerts = repo.get_dependabot_alerts()
