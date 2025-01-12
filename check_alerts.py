@@ -38,6 +38,18 @@ def check_alerts():
     ALERT_THRESHOLDS = get_thresholds_from_env()
     
     # Get all open dependabot alerts
+    try:
+        alerts = repo.get_vulnerability_alerts()
+    except github.GithubException as e:
+        print(f"Error: {e}")
+        if e.status == 403:
+            print("Error: Insufficient permissions to access Dependabot alerts")
+            print("Please ensure:")
+            print("1. GITHUB_TOKEN has 'security_events' permission")
+            print("2. Workflow has 'security-events: read' permission")
+            print("3. Dependabot alerts are enabled for this repository")
+            sys.exit(1)
+        raise
     alerts = repo.get_dependabot_alerts()
     
     violations = []
