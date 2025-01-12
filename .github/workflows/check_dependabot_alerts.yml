@@ -1,0 +1,25 @@
+name: Check Dependabot Alerts
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Run daily
+  workflow_dispatch:      # Allow manual triggers
+
+permissions:
+  security-events: read  # Grant read access to security events
+  contents: read        # Needed to check out code
+
+jobs:
+  check-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check Alerts
+        run: |
+          pip install -r requirements.txt
+          python check_alerts.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
