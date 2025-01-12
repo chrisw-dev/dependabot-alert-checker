@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 from datetime import datetime, timezone
-from github import Github
+from github import Github, GithubException
 import sys
 
 def get_alert_age(created_at):
@@ -39,8 +39,8 @@ def check_alerts():
     
     # Get all open dependabot alerts
     try:
-        alerts = repo.get_vulnerability_alerts()
-    except github.GithubException as e:
+        alerts = repo.get_dependabot_alerts()
+    except GithubException as e:
         print(f"Error: {e}")
         if e.status == 403:
             print("Error: Insufficient permissions to access Dependabot alerts")
@@ -50,7 +50,6 @@ def check_alerts():
             print("3. Dependabot alerts are enabled for this repository")
             sys.exit(1)
         raise
-    alerts = repo.get_dependabot_alerts()
     
     violations = []
     all_alerts = []
