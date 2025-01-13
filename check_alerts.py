@@ -82,16 +82,6 @@ def check_alerts():
     print(f"Total open alerts: {len(all_alerts)}")
     print(f"Alerts exceeding age threshold: {len(violations)}")
     
-    if all_alerts:
-        print("\n### All Open Alerts")
-        for alert in all_alerts:
-            print(f"\n#### {alert['package']}: {alert['title']}")
-            print(f"- **Severity:** {alert['severity']}")
-            print(f"- **Age:** {alert['age_days']} days")
-            print(f"- **Threshold:** {alert['threshold_days']} days")
-            print(f"- **Created:** {alert['created_at']}")
-            print(f"- **URL:** {alert['url']}")
-    
     if violations:
         print("\n### :x: Violations (Alerts exceeding threshold)")
         for violation in violations:
