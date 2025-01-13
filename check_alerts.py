@@ -36,6 +36,8 @@ def check_alerts():
     
     # Get thresholds from environment variables
     ALERT_THRESHOLDS = get_thresholds_from_env()
+
+    REPORT_MODE = os.getenv('INPUT_REPORT_MODE', 'false').lower() == 'true'
     
     # Get all open dependabot alerts
     try:
@@ -91,8 +93,12 @@ def check_alerts():
             print(f"- **Created:** {violation['created_at']}")
             print(f"- **URL:** {violation['url']}")
         
-        print("\n:no_entry: Action failed due to alerts exceeding age thresholds")
-        sys.exit(1)
+        if REPORT_MODE:
+            print("\n:no_entry: Action failed due to alerts exceeding age thresholds")
+            sys.exit(1)
+        else:
+            print("\n:no_entry: Action failed due to alerts exceeding age thresholds")
+            sys.exit(0)
     else:
         print("\n:white_check_mark: All alerts are within acceptable age thresholds")
         sys.exit(0)

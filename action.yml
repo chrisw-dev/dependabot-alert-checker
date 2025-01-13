@@ -19,6 +19,10 @@ inputs:
     description: 'Maximum age in days for Low severity alerts'
     required: false
     default: '30'
+  report-mode:
+    description: 'Mode to run the action in'
+    required: false
+    default: 'false'
   github-token:
     description: 'GitHub token with security alerts read permission'
     required: true
@@ -44,5 +48,6 @@ runs:
         INPUT_HIGH_THRESHOLD: ${{ inputs.high-threshold }}
         INPUT_MEDIUM_THRESHOLD: ${{ inputs.medium-threshold }}
         INPUT_LOW_THRESHOLD: ${{ inputs.low-threshold }}
+        INPUT_REPORT_MODE: ${{ inputs.report-mode }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: python ${{ github.action_path }}/check_alerts.py
