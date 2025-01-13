@@ -94,11 +94,11 @@ def check_alerts():
             print(f"- **URL:** {violation['url']}")
         
         if REPORT_MODE:
-            print("\n:no_entry: Action failed due to alerts exceeding age thresholds")
-            sys.exit(1)
+            print("\n:warning: Alerts exceed age thresholds but running in report mode")
+            sys.exit(0)
         else:
             print("\n:no_entry: Action failed due to alerts exceeding age thresholds")
-            sys.exit(0)
+            sys.exit(1)
     else:
         print("\n:white_check_mark: All alerts are within acceptable age thresholds")
         sys.exit(0)
