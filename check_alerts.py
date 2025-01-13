@@ -63,7 +63,7 @@ def check_alerts():
         threshold = ALERT_THRESHOLDS.get(severity)
         
         alert_info = {
-            'package': alert.security_advisory.package.name,
+            'package': alert.dependency.manifest_name,
             'severity': severity,
             'age_days': age,
             'threshold_days': threshold,
