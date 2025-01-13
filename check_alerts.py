@@ -4,6 +4,21 @@ from datetime import datetime, timezone
 from github import Github, GithubException
 import sys
 
+def create_or_update_pr_comment(repo, pr_number, body):
+    """Create or update comment on PR with alert results"""
+    try:
+        pr = repo.get_pull(pr_number)
+        # Look for existing bot comment
+        for comment in pr.get_issue_comments():
+            if "## Dependabot Alert Summary" in comment.body:
+                comment.edit(body)
+                return
+        # No existing comment found, create new one
+        pr.create_issue_comment(body)
+    except GithubException as e:
+        print(f"Error posting comment to PR: {e}")
+        return
+
 def get_alert_age(created_at):
     """Calculate the age of an alert in days"""
     now = datetime.now(timezone.utc)
@@ -79,29 +94,43 @@ def check_alerts():
         if age > threshold:
             violations.append(alert_info)
     
-    # Print summary as GitHub Actions output
-    print("\n## Dependabot Alert Summary")
-    print(f"Total open alerts: {len(all_alerts)}")
-    print(f"Alerts exceeding age threshold: {len(violations)}")
+    output = []
+    output.append("## Dependabot Alert Summary")
+    output.append(f"Total open alerts: {len(all_alerts)}")
+    output.append(f"Alerts exceeding age threshold: {len(violations)}")
     
     if violations:
-        print("\n### :x: Violations (Alerts exceeding threshold)")
+        output.append("\n### :x: Violations (Alerts exceeding threshold)")
         for violation in violations:
-            print(f"\n#### {violation['package']}: {violation['title']}")
-            print(f"- **Severity:** {violation['severity']}")
-            print(f"- **Age:** {violation['age_days']} days (Threshold: {violation['threshold_days']} days)")
-            print(f"- **Created:** {violation['created_at']}")
-            print(f"- **URL:** {violation['url']}")
+            output.append(f"\n#### {violation['package']}: {violation['title']}")
+            output.append(f"- **Severity:** {violation['severity']}")
+            output.append(f"- **Age:** {violation['age_days']} days (Threshold: {violation['threshold_days']} days)")
+            output.append(f"- **Created:** {violation['created_at']}")
+            output.append(f"- **URL:** {violation['url']}")
         
         if REPORT_MODE:
-            print("\n:warning: Alerts exceed age thresholds but running in report mode")
-            sys.exit(0)
+            output.append("\n:warning: Alerts exceed age thresholds but running in report mode")
         else:
-            print("\n:no_entry: Action failed due to alerts exceeding age thresholds")
-            sys.exit(1)
+            output.append("\n:no_entry: Action failed due to alerts exceeding age thresholds")
     else:
-        print("\n:white_check_mark: All alerts are within acceptable age thresholds")
-        sys.exit(0)
+        output.append("\n:white_check_mark: All alerts are within acceptable age thresholds")
+
+    # Print output to console
+    print("\n".join(output))
+    try:
+        pr_number = os.getenv('GITHUB_EVENT_NAME') == 'pull_request' and os.getenv('GITHUB_EVENT_NUMBER')
+        if pr_number:
+            create_or_update_pr_comment(repo, int(pr_number), "\n".join(output))
+    except GithubException as e:
+        print(f"Error posting comment to PR: {e}")
+        if e.status == 403:
+            print("Error: Insufficient permissions to post PR comments")
+            print("Please ensure workflow has 'pull-requests: write' permission")
+    
+    # Exit with appropriate status code
+    if violations and not REPORT_MODE:
+        sys.exit(1)
+    sys.exit(0)
 
 if __name__ == "__main__":
     check_alerts()
