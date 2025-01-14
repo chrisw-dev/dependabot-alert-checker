@@ -8,12 +8,15 @@ def create_or_update_pr_comment(repo, pr_number, body):
     """Create or update comment on PR with alert results"""
     try:
         pr = repo.get_pull(pr_number)
+        print(f"PR: {pr.title}")
         # Look for existing bot comment
         for comment in pr.get_issue_comments():
             if "## Dependabot Alert Summary" in comment.body:
+                print("Updating existing comment")
                 comment.edit(body)
                 return
         # No existing comment found, create new one
+        print("Creating new comment")
         pr.create_issue_comment(body)
     except GithubException as e:
         print(f"Error posting comment to PR: {e}")
@@ -102,7 +105,7 @@ def check_alerts():
     if violations:
         output.append("\n### :x: Violations (Alerts exceeding threshold)")
         for violation in violations:
-            output.append(f"\n#### {violation['package']}: {violation['title']}")
+            output.append(f"\n\n#### ")
             output.append(f"- **Severity:** {violation['severity']}")
             output.append(f"- **Age:** {violation['age_days']} days (Threshold: {violation['threshold_days']} days)")
             output.append(f"- **Created:** {violation['created_at']}")
@@ -120,6 +123,7 @@ def check_alerts():
     try:
         pr_number = os.getenv('GITHUB_EVENT_NAME') == 'pull_request' and os.getenv('GITHUB_EVENT_NUMBER')
         if pr_number:
+            print(f"Posting comment to PR: {pr_number}")
             create_or_update_pr_comment(repo, int(pr_number), "\n".join(output))
     except GithubException as e:
         print(f"Error posting comment to PR: {e}")
