@@ -4,6 +4,14 @@ from datetime import datetime, timezone
 from github import Github, GithubException
 import sys
 
+def get_pr_number():
+    """Get PR number if running in PR context"""
+    if os.getenv('GITHUB_EVENT_NAME') == 'pull_request':
+        print("Running in PR context")
+        print(f"PR Number: {os.getenv('GITHUB_PR_NUMBER')}")
+        return os.getenv('GITHUB_PR_NUMBER')
+    return None
+
 def create_or_update_pr_comment(repo, pr_number, body):
     """Create or update comment on PR with alert results"""
     try:
@@ -121,7 +129,7 @@ def check_alerts():
     # Print output to console
     print("\n".join(output))
     try:
-        pr_number = os.getenv('GITHUB_EVENT_NAME') == 'pull_request' and os.getenv('GITHUB_EVENT_NUMBER')
+        pr_number = get_pr_number()
         if pr_number:
             print(f"Posting comment to PR: {pr_number}")
             create_or_update_pr_comment(repo, int(pr_number), "\n".join(output))
