@@ -5,14 +5,6 @@ from datetime import datetime, timezone
 from github import Github, GithubException
 import sys
 
-def get_pr_number_old():
-    """Get PR number if running in PR context"""
-    if os.getenv('GITHUB_EVENT_NAME') == 'pull_request':
-        print("Running in PR context")
-        print(f"PR Number: {os.getenv('GITHUB_PR_NUMBER')}")
-        return os.getenv('GITHUB_PR_NUMBER')
-    return None
-
 def get_pr_number():
     """Get PR number if running in PR context"""
     if os.getenv('GITHUB_EVENT_NAME') == 'pull_request':
